@@ -1,5 +1,7 @@
 # Tasmota
 
+[![Continous Integration](https://gitlab.com/project-alice-assistant/skills/skill_Tasmota/badges/master/pipeline.svg)](https://gitlab.com/project-alice-assistant/skills/skill_Tasmota/pipelines/latest)
+
 ### Download
 
 ##### > WGET method
