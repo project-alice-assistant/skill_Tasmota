@@ -23,12 +23,12 @@ class Tasmota(AliceSkill):
 		identifier = session.intentName.split('/')[-1]
 		if self.DeviceManager.getDeviceByUID(identifier):
 			# This device is known
-			self.logInfo(f'A device just connected in {session.siteId}')
+			self.log.info(f'A device just connected in {session.siteId}')
 			self.DeviceManager.deviceConnecting(uid=identifier)
 		else:
 			# We did not ask Alice to add a new device
 			if not self.DeviceManager.broadcastFlag.isSet():
-				self.logWarning('A device is trying to connect to Alice but is unknown')
+				self.log.warning('A device is trying to connect to Alice but is unknown')
 
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/+')
