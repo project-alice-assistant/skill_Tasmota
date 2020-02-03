@@ -28,7 +28,7 @@ class Tasmota(AliceSkill):
 		else:
 			# We did not ask Alice to add a new device
 			if not self.DeviceManager.broadcastFlag.isSet():
-				selflogWarning('A device is trying to connect to Alice but is unknown')
+				self.logWarning('A device is trying to connect to Alice but is unknown')
 
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/+')
