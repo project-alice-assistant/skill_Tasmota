@@ -5,7 +5,7 @@
 ### Description
 This skill allows you to not only connect tasmota esp devices, but listen to them
 
-- Version: 1.1.2
+- Version: 1.1.3
 - Author: Psychokiller1888
 - Maintainers:
   - maxbachmann
