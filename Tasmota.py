@@ -2,6 +2,7 @@ from core.base.model.AliceSkill import AliceSkill
 from core.device.model.TasmotaConfigs import TasmotaConfigs
 from core.dialog.model.DialogSession import DialogSession
 from core.util.Decorators import MqttHandler
+from core.util.model.TelemetryType import TelemetryType
 
 
 class Tasmota(AliceSkill):
