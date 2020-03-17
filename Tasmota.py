@@ -40,9 +40,9 @@ class Tasmota(AliceSkill):
 		feedback = payload.get('feedback')
 		if not feedback:
 			return
-		
+
 		deviceType = payload['deviceType']
-		
+
 		if deviceType == 'switch':
 			if feedback > 0:
 				self.SkillManager.skillBroadcast('buttonPressed', siteId=siteId)
@@ -53,8 +53,8 @@ class Tasmota(AliceSkill):
 				self.SkillManager.skillBroadcast('motionDetected', siteId=siteId)
 			else:
 				self.SkillManager.skillBroadcast('motionStopped', siteId=siteId)
-	
-	
+
+
 	@MqttHandler('projectalice/devices/tasmota/feedback/+/SENSOR')
 	def sensorHandler(self, session: DialogSession):
 		siteId = session.siteId
@@ -62,9 +62,12 @@ class Tasmota(AliceSkill):
 
 		bme280 = payload.get('BME280')
 		if bme280:
-			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=bme280['Temperature'], service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=bme280['Humidity'], service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=bme280['Pressure'], service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=bme280['Temperature'],
+			                                service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=bme280['Humidity'],
+			                                service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=bme280['Pressure'],
+			                                service=self.name, siteId=siteId)
 
 
 	def _initConf(self, identifier: str, deviceBrand: str, deviceType: str):
