@@ -69,6 +69,15 @@ class Tasmota(AliceSkill):
 			self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=bme280['Pressure'],
 			                                service=self.name, siteId=siteId)
 
+		dht11 = payload.get("DHT11")
+		if not dht11:
+			dht11 = payload.get("DHT22")
+		if dht11:
+			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=dht11['Temperature'],
+			                                service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=dht11['Humidity'],
+			                                service=self.name, siteId=siteId)
+
 
 	def _initConf(self, identifier: str, deviceBrand: str, deviceType: str):
 		self._tasmotaConfigs = TasmotaConfigs(deviceType, identifier)
