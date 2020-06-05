@@ -8,5 +8,35 @@
 		"default": [
 			"The new device is ready!"
 		]
+	},
+	"connectESPForFlashing": {
+		"default": [
+			"Great, I can handle the entire process. Connect the ESP device in flash mode directly in one of my USB ports"
+		]
+	},
+	"espFlashedUnplugReplug": {
+		"default": [
+			"The flashing process is done! I will now configure the device for you. Please, unplug and replug it!"
+		]
+	},
+	"espFoundReadyForConf": {
+		"default": [
+			"Found it, thank you! Now configuring it!"
+		]
+	},
+	"noESPFound": {
+		"default": [
+			"I couldn't find any ESP device on my USB ports, I'm aborting the device addition. If you did connect it, make sure you are using a usb data cable."
+		]
+	},
+	"espFailed": {
+		"default": [
+			"Installing your esp device failed unfortunately, I'm really sorry for that"
+		]
+	},
+	"espFlashingDone": {
+		"default": [
+			"Ok, I have flashed your esp device with Tasmota, you can now unplug it and power it up."
+		]
 	}
 }
