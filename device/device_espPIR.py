@@ -34,12 +34,10 @@ class device_espPIR(DeviceType):
 			return 'device_espPIR.png'
 		if not device.connected:
 			return 'PIR_offline.png'
-		if device.getCustomValue('disabled'):
+		if device.getCustomValue('disabled'): #todo please implement "disabled" status - I don't own a PIR
 			return 'PIR_disabled.png'
-		if device.getCustomValue('cooldown'):
+		if device.getCustomValue('cooldown'): #todo please implement some kind of cooldown so you can see recent acivities
 			return 'PIR_justActivated.png'
-		if not device.uid:
-			return 'device_espPIR.png'
 		return 'device_espPIR.png'
 
 
