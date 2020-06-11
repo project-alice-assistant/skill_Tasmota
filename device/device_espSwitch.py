@@ -16,17 +16,17 @@ class device_espSwitch(DeviceType):
 	DEV_SETTINGS = ""
 	LOC_SETTINGS = ""
 	ESPTYPE = "switch"
+	tasmotaLink = 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
 
 	def __init__(self, data: sqlite3.Row):
-		super().__init__(data, self.DEV_SETTINGS, self.LOC_SETTINGS)
+		super().__init__(data, devSettings=self.DEV_SETTINGS, locSettings=self.LOC_SETTINGS, heartbeatRate=600)
 
 
 	def discover(self, device: Device, uid: str, replyOnSiteId: str = "", session:DialogSession = None) -> bool:
-		if not self.getAliceConfig('ssid'):
+		if not self.ConfigManager.getAliceConfigByName('ssid'):
 			raise requiresWIFISettings()
 
-		self.parentSkillInstance.startTasmotaFlashingProcess(device, uid, replyOnSiteId, session)
-		pass
+		return self.parentSkillInstance.startTasmotaFlashingProcess(device, replyOnSiteId, session)
 
 
 	def getDeviceIcon(self, device: Device) -> str:

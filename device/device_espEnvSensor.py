@@ -11,12 +11,12 @@ from skills.Tasmota import Tasmota
 from core.device.model.DeviceException import requiresWIFISettings
 
 
-class device_espPIR(DeviceType):
+class device_espEnvSensor(DeviceType):
 
 	DEV_SETTINGS = ""
 	LOC_SETTINGS = ""
-	ESPTYPE = "pir"
-	tasmotaLink = 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
+	ESPTYPE = "envSensor"
+	tasmotaLink = "https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota-sensors.bin"
 
 	def __init__(self, data: sqlite3.Row):
 		super().__init__(data, devSettings=self.DEV_SETTINGS, locSettings=self.LOC_SETTINGS, heartbeatRate=600)
@@ -31,16 +31,11 @@ class device_espPIR(DeviceType):
 
 	def getDeviceIcon(self, device: Device) -> str:
 		if not device.uid:
-			return 'device_espPIR.png'
+			return 'device_espEnvSensor.png'
 		if not device.connected:
-			return 'PIR_offline.png'
-		if device.getCustomValue('disabled'):
-			return 'PIR_disabled.png'
-		if device.getCustomValue('cooldown'):
-			return 'PIR_justActivated.png'
-		if not device.uid:
-			return 'device_espPIR.png'
-		return 'device_espPIR.png'
+			return 'temp_offline.png'
+		#todo check temperatur
+		return 'temp_OK.png'
 
 
 	def getDeviceConfig(self):

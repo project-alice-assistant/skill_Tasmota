@@ -1,14 +1,17 @@
 import esptool
 import requests
+import serial
 from core.base.model.AliceSkill import AliceSkill
 from core.device.model.TasmotaConfigs import TasmotaConfigs, TasmotaConfigs
 from core.device.model.Device import Device
 from core.dialog.model.DialogSession import DialogSession
 from core.util.Decorators import MqttHandler
 from core.util.model.TelemetryType import TelemetryType
+from serial.tools import list_ports
 from esptool import ESPLoader
 import threading
 from pathlib import Path
+import time
 
 
 class Tasmota(AliceSkill):
@@ -38,7 +41,7 @@ class Tasmota(AliceSkill):
 			self.DeviceManager.deviceConnecting(uid=identifier)
 		else:
 			# We did not ask Alice to add a new device
-			if not self.DeviceManager.broadcastFlag.isSet():
+			if not self.broadcastFlag.isSet():
 				self.logWarning('A device is trying to connect to Alice but is unknown')
 
 
@@ -107,7 +110,7 @@ class Tasmota(AliceSkill):
 			binFile.unlink()
 
 		try:
-			req = requests.get(f'https://github.com/arendst/Tasmota/releases/download/v8.2.0/tasmota.bin')
+			req = requests.get(device.getDeviceType().tasmotaLink)
 			with binFile.open('wb') as file:
 				file.write(req.content)
 				self.logInfo('Downloaded tasmota.bin')
@@ -116,7 +119,7 @@ class Tasmota(AliceSkill):
 			self._broadcastFlag.clear()
 			return False
 
-		self.ThreadManager.newThread(name='flashThread', target=self.doFlashTasmota, args=[device, replyOnSiteId, session.siteId])
+		self.ThreadManager.newThread(name='flashThread', target=self.doFlashTasmota, args=[device, replyOnSiteId])
 		return True
 
 
@@ -124,7 +127,7 @@ class Tasmota(AliceSkill):
 		port = self.DeviceManager.findUSBPort(timeout=60)
 		if not port:
 			if replyOnSiteId:
-				self.MqttManager.say(text=self.TalkManager.randomTalk('noESPFound', skill='AliceCore'), client=replyOnSiteId)
+				self.MqttManager.say(text=self.TalkManager.randomTalk('noESPFound', skill='Tasmota'), client=replyOnSiteId)
 			self._broadcastFlag.clear()
 			return
 
@@ -145,25 +148,25 @@ class Tasmota(AliceSkill):
 		except Exception as e:
 			self.logError(f'Something went wrong flashing esp device: {e}')
 			if replyOnSiteId:
-				self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='AliceCore'), client=replyOnSiteId)
+				self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='Tasmota'), client=replyOnSiteId)
 			self._broadcastFlag.clear()
 			return
 
 		self.logInfo('Tasmota flash done')
 		if replyOnSiteId:
-			self.MqttManager.say(text=self.TalkManager.randomTalk('espFlashedUnplugReplug', skill='AliceCore'), client=replyOnSiteId)
-		found = self.findUSBPort(timeout=60)
+			self.MqttManager.say(text=self.TalkManager.randomTalk('espFlashedUnplugReplug', skill='Tasmota'), client=replyOnSiteId)
+		found = self.DeviceManager.findUSBPort(timeout=60)
 		if found:
 			if replyOnSiteId:
-				self.MqttManager.say(text=self.TalkManager.randomTalk('espFoundReadyForConf', skill='AliceCore'), client=replyOnSiteId)
+				self.MqttManager.say(text=self.TalkManager.randomTalk('espFoundReadyForConf', skill='Tasmota'), client=replyOnSiteId)
 			time.sleep(10)
 			uid = self.DeviceManager.getFreeUID(mac)
 			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid=uid)
-			confs = tasmotaConfigs.getBacklogConfigs(location.getSaveName())
+			confs = tasmotaConfigs.getBacklogConfigs(device.getMainLocation().getSaveName())
 			if not confs:
 				self.logError('Something went wrong getting tasmota configuration')
 				if replyOnSiteId:
-					self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='AliceCore'), client=replyOnSiteId)
+					self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='Tasmota'), client=replyOnSiteId)
 			else:
 				ser = serial.Serial()
 				ser.baudrate = 115200
@@ -195,7 +198,7 @@ class Tasmota(AliceSkill):
 					ser.close()
 					self.logInfo('Tasmota flashing and configuring done')
 					if replyOnSiteId:
-						self.MqttManager.say(text=self.TalkManager.randomTalk('espFlashingDone', skill='AliceCore'), client=replyOnSiteId)
+						self.MqttManager.say(text=self.TalkManager.randomTalk('espFlashingDone', skill='Tasmota'), client=replyOnSiteId)
 
 					# setting the uid marks the addition as complete
 					device.pairingDone(uid=uid)
@@ -204,12 +207,12 @@ class Tasmota(AliceSkill):
 				except Exception as e:
 					self.logError(f'Something went wrong writting configuration to esp device: {e}')
 					if replyOnSiteId:
-						self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='AliceCore'), client=replyOnSiteId)
+						self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='Tasmota'), client=replyOnSiteId)
 					self._broadcastFlag.clear()
 					ser.close()
 		else:
 			if replyOnSiteId:
-				self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='AliceCore'), client=replyOnSiteId)
+				self.MqttManager.say(text=self.TalkManager.randomTalk('espFailed', skill='Tasmota'), client=replyOnSiteId)
 			self._broadcastFlag.clear()
 
 
