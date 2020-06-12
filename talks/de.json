@@ -8,5 +8,23 @@
 		"default": [
 			"Das neue Gerät ist bereit!"
 		]
-	}
+	},
+	"connectESPForFlashing": [
+		"Großartig, ich kann den gesamten Prozess übernehmen. Schließen Sie das ESP-Gerät im Blitzmodus direkt an einen meiner USB-Ports an."
+	],
+	"espFlashedUnplugReplug": [
+		"Der Flashprozess ist abgeschlossen! Ich werde nun das Gerät für dich konfigurieren. Bitte, zieh den Stecker und steck ihn wieder ein!"
+	],
+	"espFoundReadyForConf": [
+		"Gefunden, danke! Ich konfiguriere es jetzt!"
+	],
+	"noESPFound": [
+		"Ich konnte kein ESP-Gerät an meinen USB-Ports finden, ich breche die Geräteregistrierung ab. Falls du es doch verbunden hast, stelle sicher dass du ein USB-Kabel für Daten nutzt."
+	],
+	"espFlashingDone": [
+		"Ok, ich habe dein esp-Gerät mit Tasmota geflasht, du kannst es jetzt ausstecken und einschalten."
+	],
+	"espFailed": [
+		"Die Installation deines esp-Geräts ist leider fehlgeschlagen, das tut mir wirklich leid."
+	]
 }

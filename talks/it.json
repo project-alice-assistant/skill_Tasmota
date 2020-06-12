@@ -1,0 +1,32 @@
+{
+	"connectESPForFlashing": {
+		"default": [
+			"Ottimo, Mi occupo di tutto io. Collega il dispositivo ESP in modalità flash, ad una delle mie USB"
+		]
+	},
+	"espFlashedUnplugReplug": {
+		"default": [
+			"Ok, il flashing è stato fatto! Adesso te lo configuro anche, per favore staccalo e riattaccalo nuovamente"
+		]
+	},
+	"espFoundReadyForConf": {
+		"default": [
+			"Perfetto, grazie! Adesso te lo configuro!"
+		]
+	},
+	"noESPFound": {
+		"default": [
+			"Non ho trovato nessun dispositivo ESP collegato all'USB, sto annullando l'aggiunta, se l'hai collegato, assicurati che sia un cavo dati."
+		]
+	},
+	"espFailed": {
+		"default": [
+			"Sfortunatamente l'aggiunta del dispositivo ESP è fallita, mi dispiace molto"
+		]
+	},
+	"espFlashingDone": {
+		"default": [
+			"Ok, ho flashato Tasmota sul dispositivo ESP, puoi rimuoverlo ed usarlo."
+		]
+	}
+}

@@ -8,5 +8,35 @@
 		"default": [
 			"Le nouvel appareil est prêt!"
 		]
+	},
+	"connectESPForFlashing": {
+		"default": [
+			"Super, je peux m'en occuper entièrement! Connecte l'appareil en mode flash directement dans un de mes ports USB"
+		]
+	},
+	"espFlashedUnplugReplug": {
+		"default": [
+			"Le flash s'est bien passé! Je vais maintenant configurer l'appareil pour toi. Débranche et rebranche le s'il te plait"
+		]
+	},
+	"espFoundReadyForConf": {
+		"default": [
+			"J'ai trouvé, merci! Je le configure!"
+		]
+	},
+	"noESPFound": {
+		"default": [
+			"Je n'ai pas pu trouver d'appareil ESP sur mes ports USB, j'annule l'ajout d'appareil. Si tu l'as connecté, assure toi d'utiliser un cable usb de données."
+		]
+	},
+	"espFailed": {
+		"default": [
+			"Je n'ai pas pu installer ton ESP, je suis vraiment désolée"
+		]
+	},
+	"espFlashingDone": {
+		"default": [
+			"Ok, j'ai flashé ton appareil avec Tasmota. Tu peux le débrancher et le mettre en fonction"
+		]
 	}
 }
