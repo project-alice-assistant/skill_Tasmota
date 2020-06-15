@@ -8,7 +8,7 @@ import socket
 from core.base.model.ProjectAliceObject import ProjectAliceObject
 from core.dialog.model.DialogSession import DialogSession
 from skills.Tasmota import Tasmota
-from core.device.model.DeviceException import requiresWIFISettings
+from core.device.model.DeviceException import RequiresWIFISettings
 
 
 class device_espPIR(DeviceType):
@@ -24,7 +24,7 @@ class device_espPIR(DeviceType):
 
 	def discover(self, device: Device, uid: str, replyOnSiteId: str = "", session:DialogSession = None) -> bool:
 		if not self.ConfigManager.getAliceConfigByName('ssid'):
-			raise requiresWIFISettings()
+			raise RequiresWIFISettings()
 
 		return self.parentSkillInstance.startTasmotaFlashingProcess(device, replyOnSiteId, session)
 
