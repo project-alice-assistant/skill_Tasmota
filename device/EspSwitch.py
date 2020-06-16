@@ -1,28 +1,20 @@
-from core.device.model.Device import Device
-from core.device.model.Location import Location
-from core.device.model.DeviceType import DeviceType
-from core.commons import constants
 import sqlite3
-import threading
-import socket
-from core.base.model.ProjectAliceObject import ProjectAliceObject
-from core.dialog.model.DialogSession import DialogSession
-from skills.Tasmota import Tasmota
+
+from core.device.model.Device import Device
 from core.device.model.DeviceException import RequiresWIFISettings
+from core.device.model.DeviceType import DeviceType
+from core.dialog.model.DialogSession import DialogSession
 
 
-class device_espSwitch(DeviceType):
+class EspSwitch(DeviceType):
+	ESPTYPE = 'switch'
 
-	DEV_SETTINGS = ""
-	LOC_SETTINGS = ""
-	ESPTYPE = "switch"
-	tasmotaLink = 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
 
 	def __init__(self, data: sqlite3.Row):
 		super().__init__(data, devSettings=self.DEV_SETTINGS, locSettings=self.LOC_SETTINGS, heartbeatRate=600)
 
 
-	def discover(self, device: Device, uid: str, replyOnSiteId: str = "", session:DialogSession = None) -> bool:
+	def discover(self, device: Device, replyOnSiteId: str = '', session: DialogSession = None) -> bool:
 		if not self.ConfigManager.getAliceConfigByName('ssid'):
 			raise RequiresWIFISettings()
 
@@ -31,7 +23,7 @@ class device_espSwitch(DeviceType):
 
 	def getDeviceIcon(self, device: Device) -> str:
 		if not device.uid:
-			return 'device_espSwitch.png'
+			return 'EspSwitch.png'
 		if not device.connected:
 			return 'switch_offline.png'
 
@@ -42,10 +34,8 @@ class device_espSwitch(DeviceType):
 
 
 	def getDeviceConfig(self):
-		# return the custom configuration of that deviceType
-		pass
+		pass # TODO return the custom configuration of that deviceType
 
 
 	def toggle(self, device: Device):
-		# todo toggle switch?
-		pass
+		pass # TODO toggle switch?

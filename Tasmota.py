@@ -1,17 +1,18 @@
+import threading
+import time
+from pathlib import Path
+
 import esptool
 import requests
 import serial
+from esptool import ESPLoader
+
 from core.base.model.AliceSkill import AliceSkill
-from core.device.model.TasmotaConfigs import TasmotaConfigs, TasmotaConfigs
 from core.device.model.Device import Device
+from core.device.model.TasmotaConfigs import TasmotaConfigs
 from core.dialog.model.DialogSession import DialogSession
 from core.util.Decorators import MqttHandler
 from core.util.model.TelemetryType import TelemetryType
-from serial.tools import list_ports
-from esptool import ESPLoader
-import threading
-from pathlib import Path
-import time
 
 
 class Tasmota(AliceSkill):
@@ -20,6 +21,7 @@ class Tasmota(AliceSkill):
 	Description: This skill allows you to not only connect tasmota esp devices, but listen to them
 	"""
 
+	TASMOTA_DOWNLOAD_LINK = 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
 
 	def __init__(self):
 		self._initializingSkill = False
@@ -68,28 +70,28 @@ class Tasmota(AliceSkill):
 				self.SkillManager.skillBroadcast('motionStopped', siteId=siteId)
 
 
-	@MqttHandler('projectalice/devices/tasmota/feedback/+/SENSOR')
+	@MqttHandler('projectalice/devices/tasmota/feedback/+/sensor')
 	def sensorHandler(self, session: DialogSession):
 		siteId = session.siteId
 		payload = session.payload
 
+		# TODO type should be a field in payload, this is too cpu expensive
+
 		bme280 = payload.get('BME280')
 		if bme280:
-			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=bme280['Temperature'],
-			                                service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=bme280['Humidity'],
-			                                service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=bme280['Pressure'],
-			                                service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=bme280['Temperature'], service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=bme280['Humidity'], service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=bme280['Pressure'], service=self.name, siteId=siteId)
+			return
 
-		dht11 = payload.get("DHT11")
+
+		dht11 = payload.get('DHT11')
 		if not dht11:
-			dht11 = payload.get("DHT22")
+			dht11 = payload.get('DHT22')
+
 		if dht11:
-			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=dht11['Temperature'],
-			                                service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=dht11['Humidity'],
-			                                service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=dht11['Temperature'], service=self.name, siteId=siteId)
+			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=dht11['Humidity'], service=self.name, siteId=siteId)
 
 
 	def _initConf(self, identifier: str, deviceBrand: str, deviceType: str):
@@ -110,7 +112,7 @@ class Tasmota(AliceSkill):
 			binFile.unlink()
 
 		try:
-			req = requests.get(device.getDeviceType().tasmotaLink)
+			req = requests.get(self.getTasmotaDownloadLink(device))
 			with binFile.open('wb') as file:
 				file.write(req.content)
 				self.logInfo('Downloaded tasmota.bin')
@@ -121,6 +123,10 @@ class Tasmota(AliceSkill):
 
 		self.ThreadManager.newThread(name='flashThread', target=self.doFlashTasmota, args=[device, replyOnSiteId])
 		return True
+
+
+	def getTasmotaDownloadLink(self, device: Device) -> str:
+		return device.getDeviceType().TASMOTA_DOWNLOAD_LINK or self.TASMOTA_DOWNLOAD_LINK
 
 
 	def doFlashTasmota(self, device: Device, replyOnSiteId: str):
