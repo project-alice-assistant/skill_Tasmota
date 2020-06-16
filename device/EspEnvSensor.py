@@ -28,11 +28,3 @@ class EspEnvSensor(DeviceType):
 			return 'temp_offline.png'
 		# TODO check temperatur
 		return 'temp_OK.png'
-
-
-	def getDeviceConfig(self):
-		pass # TODO return the custom configuration of that deviceType
-
-
-	def toggle(self, device: Device):
-		pass # TODO enable/disable sensor?

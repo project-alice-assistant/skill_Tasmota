@@ -31,11 +31,3 @@ class EspPir(DeviceType):
 		if device.getCustomValue('cooldown'): # TODO please implement some kind of cooldown so you can see recent acivities
 			return 'PIR_justActivated.png'
 		return 'EspPir.png'
-
-
-	def getDeviceConfig(self):
-		pass # TODO return the custom configuration of that deviceType
-
-
-	def toggle(self, device: Device):
-		pass # TODO enable/disable sensor?

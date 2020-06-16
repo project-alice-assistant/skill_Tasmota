@@ -43,7 +43,7 @@ class Tasmota(AliceSkill):
 			self.DeviceManager.deviceConnecting(uid=identifier)
 		else:
 			# We did not ask Alice to add a new device
-			if not self.broadcastFlag.isSet():
+			if not self.broadcastFlag.is_set():
 				self.logWarning('A device is trying to connect to Alice but is unknown')
 
 

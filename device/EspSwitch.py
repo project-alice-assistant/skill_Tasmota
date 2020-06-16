@@ -31,11 +31,3 @@ class EspSwitch(DeviceType):
 			return 'switch_on.png'
 		else:
 			return 'switch_off.png'
-
-
-	def getDeviceConfig(self):
-		pass # TODO return the custom configuration of that deviceType
-
-
-	def toggle(self, device: Device):
-		pass # TODO toggle switch?
