@@ -9,7 +9,7 @@ This skill allows you to not only connect tasmota esp devices, but listen to the
 - Maintainers:
   - maxbachmann
   - philipp2310
-- Alice minimum Version: 1.0.0-a6
+- Alice minimum Version: 1.0.0-b1
 - Languages:
   - en
   - fr

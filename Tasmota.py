@@ -9,7 +9,7 @@ from esptool import ESPLoader
 
 from core.base.model.AliceSkill import AliceSkill
 from core.device.model.Device import Device
-from core.device.model.TasmotaConfigs import TasmotaConfigs
+from skills.Tasmota.TasmotaConfigs import TasmotaConfigs
 from core.dialog.model.DialogSession import DialogSession
 from core.util.Decorators import MqttHandler
 from core.util.model.TelemetryType import TelemetryType
@@ -20,8 +20,6 @@ class Tasmota(AliceSkill):
 	Author: Psychokiller1888
 	Description: This skill allows you to not only connect tasmota esp devices, but listen to them
 	"""
-
-	TASMOTA_DOWNLOAD_LINK = 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
 
 	def __init__(self):
 		self._initializingSkill = False
@@ -112,7 +110,8 @@ class Tasmota(AliceSkill):
 			binFile.unlink()
 
 		try:
-			req = requests.get(self.getTasmotaDownloadLink(device))
+			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid=uid)
+			req = requests.get(tasmotaConfigs.getTasmotaDownloadLink())
 			with binFile.open('wb') as file:
 				file.write(req.content)
 				self.logInfo('Downloaded tasmota.bin')
@@ -123,10 +122,6 @@ class Tasmota(AliceSkill):
 
 		self.ThreadManager.newThread(name='flashThread', target=self.doFlashTasmota, args=[device, replyOnSiteId])
 		return True
-
-
-	def getTasmotaDownloadLink(self, device: Device) -> str:
-		return device.getDeviceType().TASMOTA_DOWNLOAD_LINK or self.TASMOTA_DOWNLOAD_LINK
 
 
 	def doFlashTasmota(self, device: Device, replyOnSiteId: str):
