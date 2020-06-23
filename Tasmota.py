@@ -110,7 +110,7 @@ class Tasmota(AliceSkill):
 			binFile.unlink()
 
 		try:
-			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid=uid)
+			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid='dummy')
 			req = requests.get(tasmotaConfigs.getTasmotaDownloadLink())
 			with binFile.open('wb') as file:
 				file.write(req.content)
