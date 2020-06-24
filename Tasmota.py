@@ -6,6 +6,7 @@ import esptool
 import requests
 import serial
 from esptool import ESPLoader
+from typing import Dict, List
 
 from core.base.model.AliceSkill import AliceSkill
 from core.device.model.Device import Device
@@ -71,7 +72,7 @@ class Tasmota(AliceSkill):
 	@MqttHandler('projectalice/devices/tasmota/feedback/+/sensor')
 	def sensorHandler(self, session: DialogSession):
 		siteId = session.siteId
-		payload = session.payload
+		payload: Dict = session.payload
 
 		# TODO type should be a field in payload, this is too cpu expensive
 
@@ -163,7 +164,7 @@ class Tasmota(AliceSkill):
 			time.sleep(10)
 			uid = self.DeviceManager.getFreeUID(mac)
 			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid=uid)
-			confs = tasmotaConfigs.getBacklogConfigs(device.getMainLocation().getSaveName())
+			confs: List = tasmotaConfigs.getBacklogConfigs(device.getMainLocation().getSaveName())
 			if not confs:
 				self.logError('Something went wrong getting tasmota configuration')
 				if replyOnSiteId:
