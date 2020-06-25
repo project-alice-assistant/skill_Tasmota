@@ -6,7 +6,7 @@ import esptool
 import requests
 import serial
 from esptool import ESPLoader
-from typing import Dict, List
+from typing import Dict
 
 from core.base.model.AliceSkill import AliceSkill
 from core.device.model.Device import Device
@@ -178,22 +178,22 @@ class Tasmota(AliceSkill):
 
 				try:
 					for group in confs:
-						cmd = ';'.join(group['cmds'])
+						command = ';'.join(group['cmds'])
 						if len(group['cmds']) > 1:
-							cmd = f'Backlog {cmd}'
+							command = f'Backlog {cmd}'
 
 						arr = list()
-						if len(cmd) > 50:
-							while len(cmd) > 50:
-								arr.append(cmd[:50])
-								cmd = cmd[50:]
-							arr.append(f'{cmd}\r\n')
+						if len(command) > 50:
+							while len(command) > 50:
+								arr.append(command[:50])
+								command = command[50:]
+							arr.append(f'{command}\r\n')
 						else:
-							arr.append(f'{cmd}\r\n')
+							arr.append(f'{command}\r\n')
 
 						for piece in arr:
-							ser.write(piece.encode())
-							self.logInfo('Sent {}'.format(piece.replace('\r\n', '')))
+							ser.write(piece.encode()) # type: ignore
+							self.logInfo('Sent {}'.format(piece.replace('\r\n', ''))) # type: ignore
 							time.sleep(0.5)
 
 						time.sleep(group['waitAfter'])
