@@ -192,8 +192,8 @@ class Tasmota(AliceSkill):
 							arr.append(f'{command}\r\n')
 
 						for piece in arr:
-							ser.write(piece.encode()) # type: ignore
-							self.logInfo('Sent {}'.format(piece.replace('\r\n', ''))) # type: ignore
+							ser.write(piece.encode())
+							self.logInfo('Sent {}'.format(piece.replace('\r\n', '')))
 							time.sleep(0.5)
 
 						time.sleep(group['waitAfter'])
