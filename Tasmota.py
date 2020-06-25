@@ -10,10 +10,11 @@ from typing import Dict, List
 
 from core.base.model.AliceSkill import AliceSkill
 from core.device.model.Device import Device
-from skills.Tasmota.TasmotaConfigs import TasmotaConfigs
 from core.dialog.model.DialogSession import DialogSession
 from core.util.Decorators import MqttHandler
 from core.util.model.TelemetryType import TelemetryType
+
+from .TasmotaConfigs import TasmotaConfigs
 
 
 class Tasmota(AliceSkill):
@@ -164,7 +165,7 @@ class Tasmota(AliceSkill):
 			time.sleep(10)
 			uid = self.DeviceManager.getFreeUID(mac)
 			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid=uid)
-			confs: List = tasmotaConfigs.getBacklogConfigs(device.getMainLocation().getSaveName())
+			confs = tasmotaConfigs.getBacklogConfigs(device.getMainLocation().getSaveName())
 			if not confs:
 				self.logError('Something went wrong getting tasmota configuration')
 				if replyOnSiteId:

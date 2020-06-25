@@ -14,7 +14,7 @@ class EspPir(DeviceType):
 		super().__init__(data, devSettings=self.DEV_SETTINGS, locSettings=self.LOC_SETTINGS, heartbeatRate=600)
 
 
-	def discover(self, device: Device, replyOnSiteId: str = '', session: DialogSession = None) -> bool:
+	def discover(self, device: Device, uid: str, replyOnSiteId: str = '', session: DialogSession = None) -> bool:
 		if not self.ConfigManager.getAliceConfigByName('ssid'):
 			raise RequiresWIFISettings()
 
@@ -31,3 +31,7 @@ class EspPir(DeviceType):
 		if device.getCustomValue('cooldown'): # TODO please implement some kind of cooldown so you can see recent acivities
 			return 'PIR_justActivated.png'
 		return 'EspPir.png'
+
+
+	def toggle(self, device: Device):
+		pass # Implement me

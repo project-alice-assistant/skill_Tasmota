@@ -14,7 +14,7 @@ class EspEnvSensor(DeviceType):
 		super().__init__(data, devSettings=self.DEV_SETTINGS, locSettings=self.LOC_SETTINGS, heartbeatRate=600)
 
 
-	def discover(self, device: Device, replyOnSiteId: str = '', session: DialogSession = None) -> bool:
+	def discover(self, device: Device, uid: str, replyOnSiteId: str = '', session: DialogSession = None) -> bool:
 		if not self.ConfigManager.getAliceConfigByName('ssid'):
 			raise RequiresWIFISettings()
 
@@ -28,3 +28,7 @@ class EspEnvSensor(DeviceType):
 			return 'temp_offline.png'
 		# TODO check temperatur
 		return 'temp_OK.png'
+
+
+	def toggle(self, device: Device):
+		pass

@@ -11,6 +11,11 @@ class TasmotaConfigs(ProjectAliceObject):
 		self._uid = uid
 
 
+	@staticmethod
+	def getTasmotaDownloadLink() -> str:
+		return 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
+
+
 	@property
 	def deviceType(self) -> str:
 		return self._deviceType
