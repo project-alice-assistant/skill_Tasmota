@@ -2,67 +2,6 @@ from core.base.model.ProjectAliceObject import ProjectAliceObject
 
 
 class TasmotaConfigs(ProjectAliceObject):
-
-	def __init__(self, deviceType: str, uid: str):
-		super().__init__()
-		self._name = 'TasmotaConfigs'
-
-		self._deviceType = deviceType
-		self._uid = uid
-
-
-	@staticmethod
-	def getTasmotaDownloadLink() -> str:
-		return 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
-
-
-	@property
-	def deviceType(self) -> str:
-		return self._deviceType
-
-
-	@property
-	def uid(self) -> str:
-		return self._uid
-
-
-	def getConfigs(self, deviceBrand: str, room: str) -> list:
-		if deviceBrand not in self.CONFIGS:
-			self.logError(f'[{self._name}] Devices brand "{deviceBrand}" unknown')
-			return list()
-
-		elif self._deviceType not in self.CONFIGS[deviceBrand]:
-			self.logError(f'[{self._name}] Devices type "{self._deviceType}" unknown')
-			return list()
-
-		else:
-			confs = self.CONFIGS[deviceBrand][self._deviceType].copy()
-			for deviceConfs in confs:
-				for conf in deviceConfs:
-					conf['topic'] = conf['topic'].format(identifier=self._uid)
-					conf['payload'] = conf['payload'].format(identifier=self._uid, room=room, type=self._deviceType)
-			return confs
-
-
-	def getBacklogConfigs(self, room: str) -> list:
-		cmds = list()
-		for cmdGroup in self.BACKLOG_CONFIGS:
-			group = dict()
-			group['cmds'] = [cmd.format(
-				mqtthost=self.Commons.getLocalIp(),
-				identifier=self._uid,
-				room=room,
-				type=self._deviceType,
-				ssid=self.ConfigManager.getAliceConfigByName('ssid'),
-				wifipass=self.ConfigManager.getAliceConfigByName('wifipassword')
-			) for cmd in cmdGroup['cmds']]
-
-			group['waitAfter'] = cmdGroup['waitAfter']
-			cmds.append(group)
-
-		return cmds
-
-
 	BACKLOG_CONFIGS = [
 		{
 			'cmds'     : [
@@ -245,3 +184,63 @@ class TasmotaConfigs(ProjectAliceObject):
 			]
 		}
 	}
+
+
+	def __init__(self, deviceType: str, uid: str):
+		super().__init__()
+		self._name = 'TasmotaConfigs'
+
+		self._deviceType = deviceType
+		self._uid = uid
+
+
+	@staticmethod
+	def getTasmotaDownloadLink() -> str:
+		return 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota.bin'
+
+
+	@property
+	def deviceType(self) -> str:
+		return self._deviceType
+
+
+	@property
+	def uid(self) -> str:
+		return self._uid
+
+
+	def getConfigs(self, deviceBrand: str, room: str) -> list:
+		if deviceBrand not in self.CONFIGS:
+			self.logError(f'[{self._name}] Devices brand "{deviceBrand}" unknown')
+			return list()
+
+		elif self._deviceType not in self.CONFIGS[deviceBrand]:
+			self.logError(f'[{self._name}] Devices type "{self._deviceType}" unknown')
+			return list()
+
+		else:
+			confs = self.CONFIGS[deviceBrand][self._deviceType].copy()
+			for deviceConfs in confs:
+				for conf in deviceConfs:
+					conf['topic'] = conf['topic'].format(identifier=self._uid)
+					conf['payload'] = conf['payload'].format(identifier=self._uid, room=room, type=self._deviceType)
+			return confs
+
+
+	def getBacklogConfigs(self, room: str) -> list:
+		cmds = list()
+		for cmdGroup in self.BACKLOG_CONFIGS:
+			group = dict()
+			group['cmds'] = [cmd.format(
+				mqtthost=self.Commons.getLocalIp(),
+				identifier=self._uid,
+				room=room,
+				type=self._deviceType,
+				ssid=self.ConfigManager.getAliceConfigByName('ssid'),
+				wifipass=self.ConfigManager.getAliceConfigByName('wifipassword')
+			) for cmd in cmdGroup['cmds']]
+
+			group['waitAfter'] = cmdGroup['waitAfter']
+			cmds.append(group)
+
+		return cmds
