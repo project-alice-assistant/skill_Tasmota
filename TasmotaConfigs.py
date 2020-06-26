@@ -13,7 +13,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		{
 			'cmds'     : [
 				'MqttHost {mqtthost}',
-				'MqttClient {type}_{room}',
+				'MqttClient {type}_{location}',
 				'TelePeriod 0',
 				'module 18'
 			],
@@ -28,7 +28,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		},
 		{
 			'cmds'     : [
-				'friendlyname {type} - {room}'
+				'friendlyname {type} - {location}'
 			],
 			'waitAfter': 8
 		},
@@ -52,9 +52,9 @@ class TasmotaConfigs(ProjectAliceObject):
 		},
 		{
 			'cmds'     : [
-				'rule1 on System#Boot do publish projectalice/devices/tasmota/feedback/hello/{identifier} {{"siteId":"{room}","deviceType":"{type}","uid":"{identifier}"}} endon',
+				'rule1 on System#Boot do publish projectalice/devices/tasmota/feedback/hello/{identifier} {{"siteId":"{location}","deviceType":"{type}","uid":"{identifier}"}} endon',
 				'rule1 1',
-				'rule2 on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{room}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon',
+				'rule2 on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{location}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon',
 				'rule2 1',
 				'restart 1'
 			],
@@ -76,7 +76,7 @@ class TasmotaConfigs(ProjectAliceObject):
 				[
 					{
 						'topic'  : BASE_TOPIC + '/MqttClient',
-						'payload': 'switch_{room}'
+						'payload': 'switch_{location}'
 					},
 					{
 						'topic'  : BASE_TOPIC + '/Gpio0',
@@ -108,7 +108,7 @@ class TasmotaConfigs(ProjectAliceObject):
 					},
 					{
 						'topic'  : BASE_TOPIC + '/FriendlyName',
-						'payload': 'Switch - {room}'
+						'payload': 'Switch - {location}'
 					},
 					{
 						'topic'  : BASE_TOPIC + '/SwitchMode',
@@ -124,7 +124,7 @@ class TasmotaConfigs(ProjectAliceObject):
 					},
 					{
 						'topic'  : BASE_TOPIC + '/rule1',
-						'payload': 'on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{room}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon'
+						'payload': 'on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{location}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon'
 					},
 					{
 						'topic'  : BASE_TOPIC + '/rule1',
@@ -146,7 +146,7 @@ class TasmotaConfigs(ProjectAliceObject):
 				[
 					{
 						'topic'  : BASE_TOPIC + '/MqttClient',
-						'payload': 'PIR_{room}'
+						'payload': 'PIR_{location}'
 					},
 					{
 						'topic'  : BASE_TOPIC + '/Gpio0',
@@ -158,7 +158,7 @@ class TasmotaConfigs(ProjectAliceObject):
 					},
 					{
 						'topic'  : BASE_TOPIC + '/FriendlyName',
-						'payload': 'PIR - {room}'
+						'payload': 'PIR - {location}'
 					},
 					{
 						'topic'  : BASE_TOPIC + '/SwitchMode',
@@ -170,7 +170,7 @@ class TasmotaConfigs(ProjectAliceObject):
 					},
 					{
 						'topic'  : BASE_TOPIC + '/rule1',
-						'payload': 'on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{room}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon'
+						'payload': 'on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{location}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon'
 					},
 					{
 						'topic'  : BASE_TOPIC + '/rule1',
@@ -209,7 +209,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		return self._uid
 
 
-	def getConfigs(self, deviceBrand: str, room: str) -> list:
+	def getConfigs(self, deviceBrand: str, location: str) -> list:
 		if deviceBrand not in self.CONFIGS:
 			self.logError(f'[{self._name}] Devices brand "{deviceBrand}" unknown')
 			return list()
@@ -223,18 +223,18 @@ class TasmotaConfigs(ProjectAliceObject):
 			for deviceConfs in confs:
 				for conf in deviceConfs:
 					conf['topic'] = conf['topic'].format(identifier=self._uid)
-					conf['payload'] = conf['payload'].format(identifier=self._uid, room=room, type=self._deviceType)
+					conf['payload'] = conf['payload'].format(identifier=self._uid, location=location, type=self._deviceType)
 			return confs
 
 
-	def getBacklogConfigs(self, room: str) -> list:
+	def getBacklogConfigs(self, location: str) -> list:
 		cmds = list()
 		for cmdGroup in self.BACKLOG_CONFIGS:
 			group = dict()
 			group['cmds'] = [cmd.format(
 				mqtthost=self.Commons.getLocalIp(),
 				identifier=self._uid,
-				room=room,
+				location=location,
 				type=self._deviceType,
 				ssid=self.ConfigManager.getAliceConfigByName('ssid'),
 				wifipass=self.ConfigManager.getAliceConfigByName('wifipassword')
