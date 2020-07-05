@@ -100,6 +100,7 @@ class Tasmota(AliceSkill):
 
 
 	def startTasmotaFlashingProcess(self, device: Device, replyOnSiteId: str, session: DialogSession) -> bool:
+		replyOnSiteId = self.MqttManager.getDefaultSiteId(replyOnSiteId)
 		if session:
 			self.ThreadManager.doLater(interval=0.5, func=self.MqttManager.endDialog, args=[session.sessionId, self.randomTalk('connectESPForFlashing')])
 		elif replyOnSiteId:
