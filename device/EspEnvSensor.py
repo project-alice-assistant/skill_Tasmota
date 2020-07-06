@@ -31,4 +31,5 @@ class EspEnvSensor(DeviceType):
 
 
 	def toggle(self, device: Device):
+		# no possible functionality known yet - toggle on/off?
 		pass
