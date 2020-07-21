@@ -181,7 +181,7 @@ class Tasmota(AliceSkill):
 					for group in confs:
 						command = ';'.join(group['cmds'])
 						if len(group['cmds']) > 1:
-							command = f'Backlog {cmd}'
+							command = f'Backlog {command}'
 
 						arr = list()
 						if len(command) > 50:
