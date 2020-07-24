@@ -113,16 +113,9 @@ class TasmotaConfigs(ProjectAliceObject):
 			'cmds'     : [
 				'rule1 on System#Boot do publish projectalice/devices/tasmota/feedback/hello/{identifier} {{"siteId":"{location}","deviceType":"{type}","uid":"{identifier}"}} endon',
 				'rule1 1',
-			],
-			'waitAfter': 12
-		},
-		{
-			'cmds'     : [
-				'rule2 on tele-{brand}#temperature do var1 %value% endon on tele-{brand}#Humidity do var2 %value% endon on tele-{brand}#DewPoint do var3 %value% endon on tele-{brand}#DewPoint do event sendtemp endon on event#sendtemp do publish projectalice/devices/tasmota/feedback/{identifier}/sensor {{"sensorType":"{brand}","siteId":"{location}","deviceType":"{type}","Temperature":"%Var1%","Humidity":"%Var2%","{sensorValue}":"%Var3%","uid":"{identifier}"}} endon ',
-				'rule2 1',
 				'restart 1'
 			],
-			'waitAfter': 8
+			'waitAfter': 5
 		}
 	]
 
@@ -187,7 +180,7 @@ class TasmotaConfigs(ProjectAliceObject):
 						'payload': '0'
 					},
 					{
-						'topic'  : BASE_TOPIC + '/rule1',
+						'topic'  : BASE_TOPIC + '/rule1', #NOSONAR
 						'payload': 'on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{location}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon'
 					},
 					{
@@ -293,10 +286,6 @@ class TasmotaConfigs(ProjectAliceObject):
 
 
 	def getBacklogConfigs(self, location: str) -> list:
-		if 'BME280' in self._brand:
-			sensorValue = 'Pressure'
-		else:
-			sensorValue = 'DewPoint'
 		cmds = list()
 		if 'envSensor' in self._deviceType:
 			if self.checkSensorBrand:
@@ -315,8 +304,7 @@ class TasmotaConfigs(ProjectAliceObject):
 				ssid=self.ConfigManager.getAliceConfigByName('ssid'),
 				wifipass=self.ConfigManager.getAliceConfigByName('wifipassword'),
 				brand=self._brand,
-				gpio=self._gpioUsed,
-				sensorValue=sensorValue
+				gpio=self._gpioUsed
 			) for cmd in cmdGroup['cmds']] # type: ignore
 
 			group['waitAfter'] = cmdGroup['waitAfter'] # type: ignore
