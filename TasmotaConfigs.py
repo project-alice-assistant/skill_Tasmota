@@ -74,7 +74,7 @@ class TasmotaConfigs(ProjectAliceObject):
 			'cmds'     : [
 				'MqttHost {mqtthost}',
 				'MqttClient {type}_{location}',
-				'TelePeriod 60',
+				'TelePeriod 300',
 				'module 18'
 			],
 			'waitAfter': 8
@@ -118,7 +118,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		},
 		{
 			'cmds'     : [
-				'rule2 on tele-{brand}#temperature do var1 %value% endon on tele-{brand}#Humidity do var2 %value% endon on tele-{brand}#DewPoint do var3 %value% endon on tele-{brand}#DewPoint do event sendtemp endon on event#sendtemp do publish projectalice/devices/tasmota/feedback/{identifier}/sensor {{"sensorType":"{brand}","siteId":"{location}","deviceType":"{type}","Temperature":"%Var1%","Humidity":"%Var2%","{sensorValue}":"%Var3%","uid":"{identifier}"}} endon ',
+				'rule2 on tele-{brand}#temperature do var1 %value% endon on tele-{brand}#Humidity do var2 %value% endon on tele-{brand}#{sensorValue} do var3 %value% endon on tele-{brand}#{sensorValue} do event sendtemp endon on event#sendtemp do publish projectalice/devices/tasmota/feedback/{identifier}/sensor {{"sensorType":"{brand}","siteId":"{location}","deviceType":"{type}","Temperature":"%Var1%","Humidity":"%Var2%","{sensorValue}":"%Var3%","uid":"{identifier}"}} endon ',
 				'rule2 1',
 				'restart 1'
 			],
