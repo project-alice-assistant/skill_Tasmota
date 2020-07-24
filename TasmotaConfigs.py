@@ -332,8 +332,7 @@ class TasmotaConfigs(ProjectAliceObject):
 	@staticmethod
 	def checkSensorBrand() -> bool:
 		supportedSensors = ('BME280', 'DHT11', 'DHT22', 'AM2302', 'AM2301')
-		for brand in supportedSensors:
-			if brand in supportedSensors:
-				return True
-			else:
-				return False
+		if self._brand in supportedSensors:
+			return True
+		else:
+			return False
