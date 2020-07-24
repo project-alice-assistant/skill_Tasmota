@@ -303,7 +303,7 @@ class TasmotaConfigs(ProjectAliceObject):
 			sensorValue = 'DewPoint'
 		cmds = list()
 		if 'envSensor' in self._deviceType:
-			if self.checkSensorBrand:
+			if self.checkSensorBrand():
 				runConfigs = self.BACKLOG_TEMPSENSORCONFIGS
 			else:
 				runConfigs = self.BACKLOG_CONFIGS
@@ -329,8 +329,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		return cmds
 
 
-	@staticmethod
-	def checkSensorBrand() -> bool:
+	def checkSensorBrand(self) -> bool:
 		supportedSensors = ('BME280', 'DHT11', 'DHT22', 'AM2302', 'AM2301')
 		if self._brand in supportedSensors:
 			return True
