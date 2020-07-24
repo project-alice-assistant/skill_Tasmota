@@ -28,15 +28,16 @@ class Tasmota(AliceSkill):
 		self._confArray = []
 		self._tasmotaConfigs = None
 		self._broadcastFlag = threading.Event()
-
+		self._gpioOutput = int
 		self._flashThread = None
-
+		self._tempSensorBrand = ''
 		super().__init__()
 
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/hello/+')
 	def connectingHandler(self, session: DialogSession):
 		identifier = session.intentName.split('/')[-1]
+		print(f'mqtt just recieved a hello from {identifier}')
 		if self.DeviceManager.getDeviceByUID(identifier):
 			# This device is known
 			self.logInfo(f'A device just connected in {session.siteId}')
@@ -51,8 +52,8 @@ class Tasmota(AliceSkill):
 	def feedbackHandler(self, session: DialogSession):
 		siteId = session.siteId
 		payload = session.payload
-
 		feedback = payload.get('feedback')
+
 		if not feedback:
 			return
 
@@ -72,26 +73,27 @@ class Tasmota(AliceSkill):
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/+/sensor')
 	def sensorHandler(self, session: DialogSession):
-		siteId = session.siteId
 		payload: Dict = session.payload
+		# Note we can't use a standard tele payload for this as there is no way to then get the location for siteID
+		theTempSensor = dict()
+		#reconfigure the weird payload that has sensor b appended to it for some reason
+		for key, value in payload.items():
+			theTempSensor[key] = value
 
-		# TODO type should be a field in payload, this is too cpu expensive
+		siteId: str = theTempSensor['siteId']
+		siteId = siteId.lower()
+		supportedSensors = ('BME280', 'DHT11', 'DHT22', 'AM2302', 'AM2301')
 
-		bme280 = payload.get('BME280')
-		if bme280:
-			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=bme280['Temperature'], service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=bme280['Humidity'], service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=bme280['Pressure'], service=self.name, siteId=siteId)
-			return
+		#print(f'The Temperature sensor feedback is now => {theTempSensor}')
 
-
-		dht11 = payload.get('DHT11')
-		if not dht11:
-			dht11 = payload.get('DHT22')
-
-		if dht11:
-			self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=dht11['Temperature'], service=self.name, siteId=siteId)
-			self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=dht11['Humidity'], service=self.name, siteId=siteId)
+		for brand in supportedSensors:
+			if brand in supportedSensors and theTempSensor:  # todo add if temperature reading is a string 'NULL' then return.. probably a try statement ?
+				self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=theTempSensor['Temperature'], service=self.name, siteId=siteId)
+				self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=theTempSensor['Humidity'], service=self.name, siteId=siteId)
+				if 'BME280' in theTempSensor['sensorType']:
+					self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=theTempSensor['Pressure'], service=self.name, siteId=siteId)
+				else:
+					self.TelemetryManager.storeData(ttype=TelemetryType.DEWPOINT, value=theTempSensor['DewPoint'], service=self.name, siteId=siteId)
 
 
 	def _initConf(self, identifier: str, deviceBrand: str, deviceType: str):
@@ -164,6 +166,9 @@ class Tasmota(AliceSkill):
 			if replyOnSiteId:
 				self.MqttManager.say(text=self.TalkManager.randomTalk('espFoundReadyForConf', skill='Tasmota'), client=replyOnSiteId)
 			time.sleep(10)
+			#if TasmotaConfigs.isItATempSensor:
+			#	self.MqttManager.say(text='I can see your setting up a temperature sensor', skill='Tasmota', client=replyOnSiteId)
+			#	TasmotaConfigs.getSensorDetails()
 			uid = self.DeviceManager.getFreeUID(mac)
 			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid=uid)
 			confs = tasmotaConfigs.getBacklogConfigs(device.getMainLocation().getSaveName())
