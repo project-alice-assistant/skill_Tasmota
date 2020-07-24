@@ -80,7 +80,8 @@ class Tasmota(AliceSkill):
 		for key, value in payload.items():
 			theTempSensor[key] = value
 
-		siteId = theTempSensor['siteId']
+		siteId: str = theTempSensor['siteId']
+		siteId = siteId.lower()
 		supportedSensors = ('BME280', 'DHT11', 'DHT22', 'AM2302', 'AM2301')
 
 		#print(f'The Temperature sensor feedback is now => {theTempSensor}')
