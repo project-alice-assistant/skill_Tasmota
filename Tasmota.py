@@ -39,7 +39,7 @@ class Tasmota(AliceSkill):
 		identifier = session.intentName.split('/')[-1]
 		if self.DeviceManager.getDeviceByUID(identifier):
 			# This device is known
-			self.logInfo(f'A device just connected in {session.siteId}')
+			self.logInfo(f'A device just connected from the {session.siteId}')
 			self.DeviceManager.deviceConnecting(uid=identifier)
 		else:
 			# We did not ask Alice to add a new device
