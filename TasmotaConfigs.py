@@ -338,3 +338,9 @@ class TasmotaConfigs(ProjectAliceObject):
 		supportedSensors = ('BME280', 'DHT11', 'DHT22', 'AM2302', 'AM2301')
 		if self._brand in supportedSensors:
 			return True
+	#todo
+	# Make Alice have a Q&A with the user to find out information and set parameters
+	# such as " is this a temperature sensor ? what brand is it ? what GPIO do you need configured etc
+	# or is this a motion sensor blah blah
+	# currently self._brand and self._gpioUsed need manually set to address these questions
+
