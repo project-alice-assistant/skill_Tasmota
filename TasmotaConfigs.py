@@ -62,7 +62,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		}
 	]
 
-	BACKLOG_TEMPSENSORCONFIGS = [
+	BACKLOG_SENSORCONFIGS = [
 		{
 			'cmds'     : [
 				'ssid1 {ssid}',
@@ -88,7 +88,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		{
 			'cmds'     : [
 				'friendlyname {type} - {location}'
-				],
+			],
 			'waitAfter': 8
 		},
 		{
@@ -118,7 +118,7 @@ class TasmotaConfigs(ProjectAliceObject):
 		},
 		{
 			'cmds'     : [
-				'rule2 on tele-{brand}#temperature do var1 %value% endon on tele-{brand}#Humidity do var2 %value% endon on tele-{brand}#{sensorValue} do var3 %value% endon on tele-{brand}#{sensorValue} do event sendtemp endon on event#sendtemp do publish projectalice/devices/tasmota/feedback/{identifier}/sensor {{"sensorType":"{brand}","siteId":"{location}","deviceType":"{type}","Temperature":"%Var1%","Humidity":"%Var2%","{sensorValue}":"%Var3%","uid":"{identifier}"}} endon ',
+				'{rule2}', # on tele-{brand}#temperature do var1 %value% endon on tele-{brand}#Humidity do var2 %value% endon on tele-{brand}#{sensorValue} do var3 %value% endon on tele-{brand}#{sensorValue} do event sendtemp endon on event#sendtemp do publish projectalice/devices/tasmota/feedback/{identifier}/sensor {{"sensorType":"{brand}","siteId":"{location}","deviceType":"{type}","Temperature":"%Var1%","Humidity":"%Var2%","{sensorValue}":"%Var3%","uid":"{identifier}"}} endon ',
 				'rule2 1',
 				'restart 1'
 			],
@@ -187,7 +187,7 @@ class TasmotaConfigs(ProjectAliceObject):
 						'payload': '0'
 					},
 					{
-						'topic'  : BASE_TOPIC + '/rule1', #NOSONAR
+						'topic'  : BASE_TOPIC + '/rule1',  # NOSONAR
 						'payload': 'on switch1#state do publish projectalice/devices/tasmota/feedback/{identifier} {{"siteId":"{location}","deviceType":"{type}","feedback":%value%,"uid":"{identifier}"}} endon'
 					},
 					{
@@ -257,9 +257,10 @@ class TasmotaConfigs(ProjectAliceObject):
 		self._gpioUsed = 0
 		self._deviceType = deviceType
 		self._uid = uid
+		self._rule2 = ''
 
 
-	#@staticmethod
+	# @staticmethod
 	def getTasmotaDownloadLink(self) -> str:
 		if 'BME280' in self._brand:
 			return 'https://github.com/arendst/Tasmota/releases/download/v8.3.1/tasmota-sensors.bin'
@@ -303,12 +304,15 @@ class TasmotaConfigs(ProjectAliceObject):
 			sensorValue = 'DewPoint'
 		cmds = list()
 		if 'envSensor' in self._deviceType:
-			if self.checkSensorBrand:
-				runConfigs = self.BACKLOG_TEMPSENSORCONFIGS
-			else:
+			if self.checkSensorBrand(): #if sensor is a listed temperature sensor then do this
+				self._rule2 = f'rule2 on tele-{self._brand}#temperature do var1 %value% endon on tele-{self._brand}#Humidity do var2 %value% endon on tele-{self._brand}#{sensorValue} do var3 %value% endon on tele-{self._brand}#{sensorValue} do event sendtemp endon on event#sendtemp do publish projectalice/devices/tasmota/feedback/{self._uid}/sensor {{"sensorBrand":"{self._brand}","sensorType":"temperatureSensor","siteId":"{location}","deviceType":"{self._deviceType}","Temperature":"%Var1%","Humidity":"%Var2%","{sensorValue}":"%Var3%","uid":"{self._uid}"}} endon '
+				runConfigs = self.BACKLOG_SENSORCONFIGS
+			else: #if envSensor is not a listed temp sensor, like a pir or Lightsensor then do this
+				#todo change this runconfig to runConfigs = self.BACKLOG_SENSORCONFIGS and then add other rule2 options here if its a envSensor, IE: a rule2 for Light sensor or Pir etc
 				runConfigs = self.BACKLOG_CONFIGS
 		else:
 			runConfigs = self.BACKLOG_CONFIGS
+
 		for cmdGroup in runConfigs:
 			group = dict()
 			group['cmds'] = [cmd.format(
@@ -320,20 +324,17 @@ class TasmotaConfigs(ProjectAliceObject):
 				wifipass=self.ConfigManager.getAliceConfigByName('wifipassword'),
 				brand=self._brand,
 				gpio=self._gpioUsed,
-				sensorValue=sensorValue
-			) for cmd in cmdGroup['cmds']] # type: ignore
+				sensorValue=sensorValue,
+				rule2=self._rule2
+			) for cmd in cmdGroup['cmds']]  # type: ignore
 
-			group['waitAfter'] = cmdGroup['waitAfter'] # type: ignore
+			group['waitAfter'] = cmdGroup['waitAfter']  # type: ignore
 			cmds.append(group)
 
 		return cmds
 
 
-	@staticmethod
-	def checkSensorBrand() -> bool:
+	def checkSensorBrand(self) -> bool:
 		supportedSensors = ('BME280', 'DHT11', 'DHT22', 'AM2302', 'AM2301')
-		for brand in supportedSensors:
-			if brand in supportedSensors:
-				return True
-			else:
-				return False
+		if self._brand in supportedSensors:
+			return True
