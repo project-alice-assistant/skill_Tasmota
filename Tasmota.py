@@ -108,6 +108,8 @@ class Tasmota(AliceSkill):
 
 	def startTasmotaFlashingProcess(self, device: Device, replyOnSiteId: str, session: DialogSession) -> bool:
 		replyOnSiteId = self.MqttManager.getDefaultSiteId(replyOnSiteId)
+		#todo add a Q&A session here to grab required parameters such as is it a temp sensor, what brand etc
+		# and send some of those details for use in tasmotaconfigs.py
 		if session:
 			self.ThreadManager.doLater(interval=0.5, func=self.MqttManager.endDialog, args=[session.sessionId, self.randomTalk('connectESPForFlashing')])
 		elif replyOnSiteId:
@@ -171,9 +173,6 @@ class Tasmota(AliceSkill):
 			if replyOnSiteId:
 				self.MqttManager.say(text=self.TalkManager.randomTalk('espFoundReadyForConf', skill='Tasmota'), client=replyOnSiteId)
 			time.sleep(10)
-			#if TasmotaConfigs.isItATempSensor:
-			#	self.MqttManager.say(text='I can see your setting up a temperature sensor', skill='Tasmota', client=replyOnSiteId)
-			#	TasmotaConfigs.getSensorDetails()
 			uid = self.DeviceManager.getFreeUID(mac)
 			tasmotaConfigs = TasmotaConfigs(deviceType=device.getDeviceType().ESPTYPE, uid=uid)
 			confs = tasmotaConfigs.getBacklogConfigs(device.getMainLocation().getSaveName())
