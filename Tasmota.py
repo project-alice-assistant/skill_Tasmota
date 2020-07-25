@@ -37,7 +37,7 @@ class Tasmota(AliceSkill):
 	@MqttHandler('projectalice/devices/tasmota/feedback/hello/+')
 	def connectingHandler(self, session: DialogSession):
 		identifier = session.intentName.split('/')[-1]
-		print(f'mqtt just recieved a hello from {identifier}')
+		self.logInfo(f'Just recieved a "hello" from a device {identifier}')
 		if self.DeviceManager.getDeviceByUID(identifier):
 			# This device is known
 			self.logInfo(f'A device just connected in {session.siteId}')
