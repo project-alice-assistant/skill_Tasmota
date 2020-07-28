@@ -19,12 +19,12 @@
 		"Gefunden, danke! Ich konfiguriere es jetzt!"
 	],
 	"noESPFound": [
-		"Ich konnte kein ESP-Gerät an meinen USB-Ports finden, ich breche die Geräteregistrierung ab. Falls du es doch verbunden hast, stelle sicher dass du ein USB-Kabel für Daten nutzt."
+		"Ich konnte kein E-S-P-Gerät an meinen USB-Ports finden, ich breche die Geräteregistrierung ab. Falls du es doch verbunden hast, stelle sicher dass du ein USB-Kabel für Daten nutzt."
 	],
 	"espFlashingDone": [
-		"Ok, ich habe dein esp-Gerät mit Tasmota geflasht, du kannst es jetzt ausstecken und einschalten."
+		"Ok, ich habe dein E-S-P-Gerät mit Tasmota geflasht, du kannst es jetzt ausstecken und einschalten."
 	],
 	"espFailed": [
-		"Die Installation deines esp-Geräts ist leider fehlgeschlagen, das tut mir wirklich leid."
+		"Die Installation deines E-S-P-Gerät ist leider fehlgeschlagen, das tut mir wirklich leid."
 	]
 }
