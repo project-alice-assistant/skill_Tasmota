@@ -62,7 +62,7 @@ class Tasmota(AliceSkill):
 			teleType: str = item[0]
 			teleType = teleType.upper()
 			#some of these may need moved to another method ? added cause they are all enviromental sensing
-			self.logDebug(f'The {teleType} reading is {item[1]} (turn this message off on line 63)')  # uncomment me to see incoming temperature payload
+			#self.logDebug(f'The {teleType} reading is {item[1]} (turn this message off on line 63)')  # uncomment me to see incoming temperature payload
 			try:
 				if 'TEMPERATURE' in teleType:
 					self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=item[1], service=self.name, siteId=siteId)
