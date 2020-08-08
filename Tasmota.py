@@ -1,5 +1,6 @@
 import threading
 import time
+import re
 from pathlib import Path
 
 import esptool
@@ -28,9 +29,8 @@ class Tasmota(AliceSkill):
 		self._confArray = []
 		self._tasmotaConfigs = None
 		self._broadcastFlag = threading.Event()
-		self._gpioOutput = int
 		self._flashThread = None
-		self._tempSensorBrand = ''
+		self._isActive = True
 		super().__init__()
 
 
@@ -46,13 +46,113 @@ class Tasmota(AliceSkill):
 			if not self.broadcastFlag.is_set():
 				self.logWarning('A device is trying to connect to Alice but is unknown')
 
+	def addSensorToDatabase(self, ttype: str, value: str, service: str, siteId: str, timestamp=None):
+		if not self._isActive:
+			return
+		timestamp = timestamp or time.time()
+
+		self.databaseInsert(
+			tableName='telemetry',
+			query='INSERT INTO :__table__ (type, value, service, siteId, timestamp) VALUES (:type, :value, :service, :siteId, :timestamp)',
+			values={'type': ttype, 'value': value, 'service': service, 'siteId': siteId, 'timestamp': round(timestamp)}
+		)
+
+	def envSensorResults(self, newPayload: dict, siteId: str):
+		for item in newPayload.items():
+			teleType: str = item[0]
+			teleType = teleType.upper()
+			#some of these may need moved to another method ? added cause they are all enviromental sensing
+			#self.logDebug(f'The {teleType} reading is {item[1]} (turn this message off on line 63)')  # uncomment me to see incoming temperature payload
+			try:
+				if 'TEMPERATURE' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=item[1], service=self.name, siteId=siteId)
+				elif 'HUMIDITY' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=item[1], service=self.name, siteId=siteId)
+				elif 'DEWPOINT' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.DEWPOINT, value=item[1], service=self.name, siteId=siteId)
+				elif 'PRESSURE' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=item[1], service=self.name, siteId=siteId)
+				elif 'GAS' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.GAS, value=item[1], service=self.name, siteId=siteId)
+				elif 'AIR_QUALITY' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.AIR_QUALITY, value=item[1], service=self.name, siteId=siteId)
+				elif 'UV_INDEX' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.UV_INDEX, value=item[1], service=self.name, siteId=siteId)
+				elif 'NOISE' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.NOISE, value=item[1], service=self.name, siteId=siteId)
+				elif 'CO2' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.CO2, value=item[1], service=self.name, siteId=siteId)
+				elif 'RAIN' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.RAIN, value=item[1], service=self.name, siteId=siteId)
+				elif 'SUM_RAIN_1' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.SUM_RAIN_1, value=item[1], service=self.name, siteId=siteId)
+				elif 'SUM_RAIN_24' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.SUM_RAIN_24, value=item[1], service=self.name, siteId=siteId)
+				elif 'WIND_STRENGTH' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.WIND_STRENGTH, value=item[1], service=self.name, siteId=siteId)
+				elif 'WIND_ANGLE' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.WIND_ANGLE, value=item[1], service=self.name, siteId=siteId)
+				elif 'GUST_STREGTH' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.GUST_STRENGTH, value=item[1], service=self.name, siteId=siteId)
+				elif 'GUST_ANGLE' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.GUST_ANGLE, value=item[1], service=self.name, siteId=siteId)
+				elif 'Illuminance' in teleType:
+					self.TelemetryManager.storeData(ttype=TelemetryType.LIGHT, value=item[1], service=self.name, siteId=siteId)
+				#todo Capture if SWITCH OR POWER and send to another method for database storing/action somewhere ?
+			except Exception as e:
+				self.logInfo(f'A exception occured adding {teleType} reading: {e}')
+
+	@staticmethod
+	def makeSingleDict(newPayload):
+		singleDict = {}
+		for k, v in newPayload.items():
+			if isinstance(v, dict):
+				singleDict.update(v)
+			else:
+				singleDict.update({k: v})
+		return singleDict
+
+
+	@MqttHandler('projectalice/devices/tasmota/feedback/+/SENSOR')
+	def sensorTeleFeedback(self, session: DialogSession):
+		if not self.ConfigManager.getAliceConfigByName('enableDataStoring'):
+			self._isActive = False
+			self.logInfo('Data storing is disabled')
+			return
+
+		payload: Dict = session.payload
+		uid = session.intentName.split("/")[-2]
+		device = self.DeviceManager.getDeviceByUID(uid=uid)
+		if not device:
+			return
+
+		location = self.LocationManager.getLocation(locId=device.locationID)
+		siteId: str = location.name
+		siteId = siteId.lower()
+		#NOSONAR
+		#print(f'payload of tasmota device is {payload}')
+		#print("")
+
+		relevantPayload = dict()
+		reg = re.compile("POWER.")
+		reg2 = re.compile("Switch.")
+
+		for key, item in payload.items():
+			if isinstance(item, dict) or 'Switch' in item or 'POWER' in item or bool(re.match(reg, key)) or bool(re.match(reg2, key)):
+				relevantPayload[key] = item
+
+		cleanedDictionary = self.makeSingleDict(relevantPayload)
+		#print(f'The new single dictionary payload is {cleanedDictionary}')
+
+		self.envSensorResults(newPayload=cleanedDictionary, siteId=siteId)
+
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/+')
 	def feedbackHandler(self, session: DialogSession):
 		siteId = session.siteId
 		payload = session.payload
 		feedback = payload.get('feedback')
-
+		#print(f'feedbackHandler - {payload} and {feedback}')
 		if not feedback:
 			return
 
@@ -70,37 +170,6 @@ class Tasmota(AliceSkill):
 				self.SkillManager.skillBroadcast('motionStopped', siteId=siteId)
 
 
-	@MqttHandler('projectalice/devices/tasmota/feedback/+/sensor')
-	def sensorHandler(self, session: DialogSession):
-		payload: Dict = session.payload
-		# Note we can't use a standard tele payload for this as there is no way to then get the location for siteID
-		sensorPayload = dict()
-		#reconfigure the weird payload that has sensor b appended to it for some reason
-		for key, value in payload.items():
-			sensorPayload[key] = value
-
-		siteId: str = sensorPayload['siteId']
-		siteId = siteId.lower()
-		supportedTemperatureSensors = ('BME280', 'DHT11', 'DHT22', 'AM2302', 'AM2301')
-
-		#print(f'The Temperature sensor feedback is now => {sensorPayload}')
-
-		#added "if" statement so not looping through this if incoming sensor is a pir or light sensor etc
-		if 'temperatureSensor' in sensorPayload['sensorType']:
-			for brand in supportedTemperatureSensors:
-				if brand in supportedTemperatureSensors and brand in sensorPayload['sensorBrand']:
-					try:
-						self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=sensorPayload['Temperature'], service=self.name, siteId=siteId)
-						self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=sensorPayload['Humidity'], service=self.name, siteId=siteId)
-						if 'BME280' in sensorPayload['sensorBrand']:
-							self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=sensorPayload['Pressure'], service=self.name, siteId=siteId)
-						else:
-							self.TelemetryManager.storeData(ttype=TelemetryType.DEWPOINT, value=sensorPayload['DewPoint'], service=self.name, siteId=siteId)
-					except:
-						self.logDebug(f'A error occurred capturing data from your {brand} sensor. Will try again soon')
-						break
-
-
 	def _initConf(self, identifier: str, deviceBrand: str, deviceType: str):
 		self._tasmotaConfigs = TasmotaConfigs(deviceType, identifier)
 		self._confArray = self._tasmotaConfigs.getConfigs(deviceBrand, self.DeviceManager.broadcastRoom)
@@ -108,8 +177,7 @@ class Tasmota(AliceSkill):
 
 	def startTasmotaFlashingProcess(self, device: Device, replyOnSiteId: str, session: DialogSession) -> bool:
 		replyOnSiteId = self.MqttManager.getDefaultSiteId(replyOnSiteId)
-		#todo add a Q&A session here to grab required parameters such as is it a temp sensor, what brand etc
-		# and send some of those details for use in tasmotaconfigs.py
+
 		if session:
 			self.ThreadManager.doLater(interval=0.5, func=self.MqttManager.endDialog, args=[session.sessionId, self.randomTalk('connectESPForFlashing')])
 		elif replyOnSiteId:
