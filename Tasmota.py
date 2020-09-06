@@ -141,7 +141,7 @@ class Tasmota(AliceSkill):
 
 		cleanedDictionary = self.makeSingleDict(relevantPayload)
 
-		self.envSensorResults(newPayload=cleanedDictionary, siteId=siteId, locationId=location.id)
+		self.envSensorResults(newPayload=cleanedDictionary, siteId=session.siteId, locationId=location.id)
 
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/+')
