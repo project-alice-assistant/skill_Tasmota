@@ -46,6 +46,7 @@ class Tasmota(AliceSkill):
 			if not self.broadcastFlag.is_set():
 				self.logWarning('A device is trying to connect to Alice but is unknown')
 
+	#todo: unused?
 	def addSensorToDatabase(self, ttype: str, value: str, service: str, siteId: str, timestamp=None):
 		if not self._isActive:
 			return
@@ -57,7 +58,8 @@ class Tasmota(AliceSkill):
 			values={'type': ttype, 'value': value, 'service': service, 'siteId': siteId, 'timestamp': round(timestamp)}
 		)
 
-	def envSensorResults(self, newPayload: dict, siteId: str):
+
+	def envSensorResults(self, newPayload: dict, siteId: str, locationId: int):
 		for item in newPayload.items():
 			teleType: str = item[0]
 			teleType = teleType.upper()
@@ -102,6 +104,7 @@ class Tasmota(AliceSkill):
 			except Exception as e:
 				self.logInfo(f'A exception occured adding {teleType} reading: {e}')
 
+
 	@staticmethod
 	def makeSingleDict(newPayload):
 		singleDict = {}
@@ -126,12 +129,7 @@ class Tasmota(AliceSkill):
 		if not device:
 			return
 
-		location = self.LocationManager.getLocation(locId=device.locationID)
-		siteId: str = location.name
-		siteId = siteId.lower()
-		#NOSONAR
-		#print(f'payload of tasmota device is {payload}')
-		#print("")
+		location = device.getMainLocation()
 
 		relevantPayload = dict()
 		reg = re.compile("POWER.")
@@ -142,9 +140,8 @@ class Tasmota(AliceSkill):
 				relevantPayload[key] = item
 
 		cleanedDictionary = self.makeSingleDict(relevantPayload)
-		#print(f'The new single dictionary payload is {cleanedDictionary}')
 
-		self.envSensorResults(newPayload=cleanedDictionary, siteId=siteId)
+		self.envSensorResults(newPayload=cleanedDictionary, siteId=session.siteId, locationId=location.id)
 
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/+')
