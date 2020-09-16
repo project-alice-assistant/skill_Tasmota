@@ -46,20 +46,8 @@ class Tasmota(AliceSkill):
 			if not self.broadcastFlag.is_set():
 				self.logWarning('A device is trying to connect to Alice but is unknown')
 
-	#todo: unused?
-	def addSensorToDatabase(self, ttype: str, value: str, service: str, siteId: str, timestamp=None):
-		if not self._isActive:
-			return
-		timestamp = timestamp or time.time()
-
-		self.databaseInsert(
-			tableName='telemetry',
-			query='INSERT INTO :__table__ (type, value, service, siteId, timestamp) VALUES (:type, :value, :service, :siteId, :timestamp)',
-			values={'type': ttype, 'value': value, 'service': service, 'siteId': siteId, 'timestamp': round(timestamp)}
-		)
-
-
 	def envSensorResults(self, newPayload: dict, siteId: str, locationId: int):
+
 		for item in newPayload.items():
 			teleType: str = item[0]
 			teleType = teleType.upper()
@@ -67,39 +55,39 @@ class Tasmota(AliceSkill):
 			#self.logDebug(f'The {teleType} reading is {item[1]} (turn this message off on line 63)')  # uncomment me to see incoming temperature payload
 			try:
 				if 'TEMPERATURE' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'HUMIDITY' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'DEWPOINT' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.DEWPOINT, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.DEWPOINT, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'PRESSURE' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.PRESSURE, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'GAS' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.GAS, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.GAS, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'AIR_QUALITY' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.AIR_QUALITY, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.AIR_QUALITY, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'UV_INDEX' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.UV_INDEX, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.UV_INDEX, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'NOISE' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.NOISE, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.NOISE, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'CO2' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.CO2, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.CO2, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'RAIN' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.RAIN, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.RAIN, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'SUM_RAIN_1' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.SUM_RAIN_1, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.SUM_RAIN_1, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'SUM_RAIN_24' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.SUM_RAIN_24, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.SUM_RAIN_24, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'WIND_STRENGTH' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.WIND_STRENGTH, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.WIND_STRENGTH, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'WIND_ANGLE' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.WIND_ANGLE, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.WIND_ANGLE, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'GUST_STREGTH' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.GUST_STRENGTH, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.GUST_STRENGTH, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'GUST_ANGLE' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.GUST_ANGLE, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.GUST_ANGLE, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'Illuminance' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.LIGHT, value=item[1], service=self.name, siteId=siteId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.LIGHT, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				#todo Capture if SWITCH OR POWER and send to another method for database storing/action somewhere ?
 			except Exception as e:
 				self.logInfo(f'A exception occured adding {teleType} reading: {e}')
