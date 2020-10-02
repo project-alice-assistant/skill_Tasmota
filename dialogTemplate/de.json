@@ -1,7 +1,5 @@
 {
 	"skill": "Tasmota",
-	"icon": "time",
-	"description": "Mit diesem Modul können Sie tasmota esp-Geräte nicht nur anschließen, sondern ihnen auch zuhören.",
 	"slotTypes": [],
 	"intents": []
 }
