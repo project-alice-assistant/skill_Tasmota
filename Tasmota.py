@@ -37,16 +37,16 @@ class Tasmota(AliceSkill):
 	@MqttHandler('projectalice/devices/tasmota/feedback/hello/+')
 	def connectingHandler(self, session: DialogSession):
 		identifier = session.intentName.split('/')[-1]
-		if self.DeviceManager.getDeviceByUID(identifier):
+		if self.DeviceManager.getDevice(uid=identifier):
 			# This device is known
-			self.logInfo(f'A device just connected from the {session.siteId}')
+			self.logInfo(f'A device just connected from the {session.deviceUid}')
 			self.DeviceManager.deviceConnecting(uid=identifier)
 		else:
 			# We did not ask Alice to add a new device
 			if not self.broadcastFlag.is_set():
 				self.logWarning('A device is trying to connect to Alice but is unknown')
 
-	def envSensorResults(self, newPayload: dict, siteId: str, locationId: int):
+	def envSensorResults(self, newPayload: dict, deviceUid: str, locationId: int):
 
 		for item in newPayload.items():
 			teleType: str = item[0]
@@ -55,7 +55,7 @@ class Tasmota(AliceSkill):
 			#self.logDebug(f'The {teleType} reading is {item[1]} (turn this message off on line 63)')  # uncomment me to see incoming temperature payload
 			try:
 				if 'TEMPERATURE' in teleType:
-					self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
+					self.TelemetryManager.storeData(ttype=TelemetryType.TEMPERATURE, value=item[1], service=self.name, deviceUid=deviceUid, locationID=locationId)
 				elif 'HUMIDITY' in teleType:
 					self.TelemetryManager.storeData(ttype=TelemetryType.HUMIDITY, value=item[1], service=self.name, siteId=siteId, locationID=locationId)
 				elif 'DEWPOINT' in teleType:
@@ -129,12 +129,12 @@ class Tasmota(AliceSkill):
 
 		cleanedDictionary = self.makeSingleDict(relevantPayload)
 
-		self.envSensorResults(newPayload=cleanedDictionary, siteId=session.siteId, locationId=location.id)
+		self.envSensorResults(newPayload=cleanedDictionary, deviceUid=session.deviceUid, locationId=location.id)
 
 
 	@MqttHandler('projectalice/devices/tasmota/feedback/+')
 	def feedbackHandler(self, session: DialogSession):
-		siteId = session.siteId
+		deviceUid = session.deviceUid
 		payload = session.payload
 		feedback = payload.get('feedback')
 		#print(f'feedbackHandler - {payload} and {feedback}')
@@ -145,14 +145,14 @@ class Tasmota(AliceSkill):
 
 		if deviceType == 'switch':
 			if feedback > 0:
-				self.SkillManager.skillBroadcast('buttonPressed', siteId=siteId)
+				self.SkillManager.skillBroadcast('buttonPressed', deviceUid=deviceUid)
 			else:
-				self.SkillManager.skillBroadcast('buttonReleased', siteId=siteId)
+				self.SkillManager.skillBroadcast('buttonReleased', deviceUid=deviceUid)
 		elif deviceType == 'pir':
 			if feedback > 0:
-				self.SkillManager.skillBroadcast('motionDetected', siteId=siteId)
+				self.SkillManager.skillBroadcast('motionDetected', deviceUid=deviceUid)
 			else:
-				self.SkillManager.skillBroadcast('motionStopped', siteId=siteId)
+				self.SkillManager.skillBroadcast('motionStopped', deviceUid=deviceUid)
 
 
 	def _initConf(self, identifier: str, deviceBrand: str, deviceType: str):
@@ -160,12 +160,10 @@ class Tasmota(AliceSkill):
 		self._confArray = self._tasmotaConfigs.getConfigs(deviceBrand, self.DeviceManager.broadcastRoom)
 
 
-	def startTasmotaFlashingProcess(self, device: Device, replyOnSiteId: str, session: DialogSession) -> bool:
-		replyOnSiteId = self.MqttManager.getDefaultSiteId(replyOnSiteId)
-
+	def startTasmotaFlashingProcess(self, device: Device, replyOnDeviceUid: str, session: DialogSession) -> bool:
 		if session:
 			self.ThreadManager.doLater(interval=0.5, func=self.MqttManager.endDialog, args=[session.sessionId, self.randomTalk('connectESPForFlashing')])
-		elif replyOnSiteId:
+		elif replyOnDeviceUid:
 			self.ThreadManager.doLater(interval=0.5, func=self.MqttManager.say, args=[self.randomTalk('connectESPForFlashing')])
 
 		self._broadcastFlag.set()
