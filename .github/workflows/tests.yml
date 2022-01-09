@@ -23,12 +23,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install projectalice-sk
-          pip install types-requests
       - name: Validate skill
         run: |
           projectalice-sk validate
       - name: Mypi tests
-        uses: jpetrucciani/mypy-check@master
+        uses: jpetrucciani/mypy-check@0.910
         with:
           path: '.'
       - name: Sonarcloud scan
