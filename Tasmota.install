@@ -1,6 +1,6 @@
 {
     "name": "Tasmota",
-    "version": "1.3.14",
+    "version": "1.4.0",
     "icon": "fas fa-microchip",
     "category": "automation",
     "author": "Psychokiller1888",
@@ -10,7 +10,7 @@
         "lazza"
     ],
     "desc": "This skill allows you to not only connect tasmota esp devices, but listen to them",
-    "aliceMinVersion": "1.0.0-b5",
+    "aliceMinVersion": "1.0.0-rc2",
     "systemRequirements": [],
     "pipRequirements": ["esptool"],
     "conditions": {
