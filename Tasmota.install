@@ -12,7 +12,7 @@
     "desc": "This skill allows you to not only connect tasmota esp devices, but listen to them",
     "aliceMinVersion": "1.0.0-b5",
     "systemRequirements": [],
-    "pipRequirements": ['esptool'],
+    "pipRequirements": ["esptool"],
     "conditions": {
         "lang": [
             "en",
