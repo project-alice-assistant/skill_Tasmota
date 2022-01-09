@@ -27,7 +27,7 @@ jobs:
         run: |
           projectalice-sk validate
       - name: Mypi tests
-        uses: jpetrucciani/mypy-check@0.910
+        uses: jpetrucciani/mypy-check@0.900
         with:
           path: '.'
       - name: Sonarcloud scan
